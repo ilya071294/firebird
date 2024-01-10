@@ -3079,6 +3079,11 @@ static void extend_relation(thread_db* tdbb, jrd_rel* relation, WIN* window, con
 		window->win_page = firstPage.getPageNum() + i;
 
 		dpage = (data_page*) CCH_fake(tdbb, window, 1);
+		const ULONG pip_seq = window->win_page.getPageNum() / dbb->dbb_page_manager.pagesPerPIP;
+		const ULONG pip_page = (pip_seq == 0) ?
+			FIRST_PIP_PAGE : pip_seq * dbb->dbb_page_manager.pagesPerPIP - 1;
+		CCH_precedence(tdbb, window, pip_page);
+
 		dpage->dpg_sequence = pp_sequence * dbb->dbb_dp_per_pp + slot + i;
 		dpage->dpg_relation = relation->rel_id;
 		dpage->dpg_header.pag_type = pag_data;
