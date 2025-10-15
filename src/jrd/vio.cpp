@@ -3017,7 +3017,7 @@ bool VIO_get(thread_db* tdbb, record_param* rpb, jrd_tra* transaction, MemoryPoo
 
 	const USHORT lock_type = (rpb->rpb_stream_flags & RPB_s_update) ? LCK_write : LCK_read;
 
-	if (!DPM_get(tdbb, rpb, lock_type) ||
+	if (!DPM_get(tdbb, rpb, lock_type, true) ||
 		!VIO_chase_record_version(tdbb, rpb, transaction, pool, false, false))
 	{
 		return false;
@@ -3047,6 +3047,8 @@ bool VIO_get(thread_db* tdbb, record_param* rpb, jrd_tra* transaction, MemoryPoo
 		}
 		else
 			VIO_data(tdbb, rpb, pool);
+
+		fb_assert(rpb->getWindow(tdbb).win_bdb == NULL);
 	}
 
 	tdbb->bumpStats(RecordStatType::IDX_READS, rpb->rpb_relation->rel_id);
@@ -3956,6 +3958,8 @@ bool VIO_next_record(thread_db* tdbb,
 		}
 		else
 			VIO_data(tdbb, rpb, pool);
+
+		fb_assert(rpb->getWindow(tdbb).win_bdb == NULL);
 	}
 
 #ifdef VIO_DEBUG

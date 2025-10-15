@@ -1054,7 +1054,7 @@ int gstat(Firebird::UtilSvc* uSvc)
 				relation->rel_data_pages, average);
 
 			dba_print(false, 46, SafeArg() << relation->rel_primary_pages <<
-				relation->rel_data_pages - relation->rel_primary_pages <<
+				relation->rel_data_pages - relation->rel_primary_pages - relation->rel_empty_pages <<
 				relation->rel_swept_pages);
 			// msg 46: "    Primary pages: @1, secondary pages: @2, swept pages: @3
 
@@ -1457,13 +1457,24 @@ static bool analyze_data_page( dba_rel* relation, const data_page* page, bool sw
 		--bucket;
 
 	if (page->dpg_count == 0)
+	{
+		fb_assert(!(page->dpg_header.pag_flags & dpg_full));
 		++relation->rel_empty_pages;
-	if (page->dpg_header.pag_flags & dpg_full)
-		++relation->rel_full_pages;
-	if (!(page->dpg_header.pag_flags & dpg_secondary))
-		++relation->rel_primary_pages;
-	if (page->dpg_header.pag_flags & dpg_swept)
-		++relation->rel_swept_pages;
+	}
+	else
+	{
+		if (page->dpg_header.pag_flags & dpg_full)
+			++relation->rel_full_pages;
+
+		if (!(page->dpg_header.pag_flags & dpg_secondary))
+		{
+			++relation->rel_primary_pages;
+
+			if (page->dpg_header.pag_flags & dpg_swept)
+				++relation->rel_swept_pages;
+		}
+	}
+
 	++relation->rel_fill_distribution[bucket];
 
 	return true;
