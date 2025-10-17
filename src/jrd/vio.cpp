@@ -3014,6 +3014,8 @@ bool VIO_get(thread_db* tdbb, record_param* rpb, jrd_tra* transaction, MemoryPoo
 	// Fetch data page from a modify/erase input stream with a write
 	// lock. This saves an upward conversion to a write lock when
 	// refetching the page in the context of the output stream.
+	// Note that this makes sense only for Classic and SuperClassic.
+	// RPB_s_update flag is not set when Super is used.
 
 	const USHORT lock_type = (rpb->rpb_stream_flags & RPB_s_update) ? LCK_write : LCK_read;
 
@@ -3913,6 +3915,8 @@ bool VIO_next_record(thread_db* tdbb,
 	// Fetch data page from a modify/erase input stream with a write
 	// lock. This saves an upward conversion to a write lock when
 	// refetching the page in the context of the output stream.
+	// Note that this makes sense only for Classic and SuperClassic.
+	// RPB_s_update flag is not set when Super is used.
 
 	const USHORT lock_type = (rpb->rpb_stream_flags & RPB_s_update) ? LCK_write : LCK_read;
 
